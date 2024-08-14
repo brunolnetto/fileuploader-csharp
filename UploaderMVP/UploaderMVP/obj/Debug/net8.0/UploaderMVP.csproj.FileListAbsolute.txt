@@ -16,6 +16,8 @@ C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\Upload
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.csproj.CoreCompileInputs.cache
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.RazorAssemblyInfo.cache
+C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.RazorAssemblyInfo.cs
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\staticwebassets\msbuild.UploaderMVP.Microsoft.AspNetCore.StaticWebAssets.props
@@ -30,5 +32,3 @@ C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\refint
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.pdb
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.genruntimeconfig.cache
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\ref\UploaderMVP.dll
-C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.RazorAssemblyInfo.cache
-C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\obj\Debug\net8.0\UploaderMVP.RazorAssemblyInfo.cs

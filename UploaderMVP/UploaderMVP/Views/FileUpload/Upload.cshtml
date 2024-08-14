@@ -1,5 +1,5 @@
 ﻿@page
-@model UploaderMVP.Views.FileUpload.FileUploadModel
+@model UploaderMVP.Models.FileUploadViewModel
 
 <h2>@ViewData["Title"]</h2>
 
@@ -23,9 +23,9 @@
     <button type="submit" class="btn btn-primary">Upload</button>
 </form>
 
-@if (Model.UploadViewModel.Metadata != null && !string.IsNullOrEmpty(Model.UploadViewModel.Metadata.UploadResult))
+@if (Model.Metadata != null && !string.IsNullOrEmpty(Model.Metadata.UploadResult))
 {
-    <div class="alert alert-success">@Model.UploadViewModel.Metadata.UploadResult</div>
+    <div class="alert alert-success">@Model.Metadata.UploadResult</div>
 }
 
 @section Scripts {

@@ -5,15 +5,20 @@ using UploaderMVP.Services;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace UploaderMVP.Controllers
 {
-    [ApiController]
-    [Route("upload")]
     public class FileUploadController : Controller
     {
-        private readonly IFileUploader _fileUploader;
         private readonly ILogger<FileUploadController> _logger;
+        private readonly IFileUploader _fileUploader;
+        private const string Directory = "/uploads";
+
+
+        public FileUploadController()
+        {
+        }
 
         public FileUploadController(IFileUploader fileUploader, ILogger<FileUploadController> logger)
         {
@@ -21,16 +26,24 @@ namespace UploaderMVP.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        private static ILogger<FileUploadController> CreateDefaultLogger()
+        {
+            // Note: In a real application, you might want to use a logging framework configured in your DI container.
+            return LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<FileUploadController>();
+        }
+
         public IActionResult Upload()
         {
-            var model = new FileUploadViewModel();
+            var model = new FileUploadViewModel
+            {
+                Files = Enumerable.Empty<IFormFile>(), // Initialize empty file collection
+            }; 
+
             ViewData["Title"] = "File Upload";
             return View(model);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Upload(FileUploadViewModel model, CancellationToken cancellationToken)
+        public async Task<IActionResult> UploadPost(FileUploadViewModel model, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {

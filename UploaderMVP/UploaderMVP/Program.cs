@@ -1,3 +1,5 @@
+using UploaderMVP.Controllers;
+using UploaderMVP.Models;
 using UploaderMVP.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,13 +22,15 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+
 }
 
 //app.UseHttpsRedirection();
@@ -40,5 +44,12 @@ app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapGet("/", () => "Hello World!");
+app.MapGet("/upload", () => { 
+    return new FileUploadController().Upload(); });
+app.MapPost("/upload", (FileUploadViewModel model, CancellationToken cancellationToken) => {
+    return new FileUploadController().UploadPost(model, cancellationToken);
+});
 
 app.Run();
