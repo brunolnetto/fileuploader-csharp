@@ -1,0 +1,33 @@
+﻿@page
+@model UploaderMVP.Views.FileUpload.FileUploadModel
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="UploadViewModel.Files">Choose files:</label>
+        <input asp-for="UploadViewModel.Files" type="file" multiple class="form-control" />
+        <span asp-validation-for="UploadViewModel.Files" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UploadViewModel.UploadMethod">Select upload method:</label>
+        <select asp-for="UploadViewModel.UploadMethod" class="form-control">
+            <option value="serial">Serial</option>
+            <option value="parallel">Parallel</option>
+            <option value="asynchronous">Asynchronous</option>
+        </select>
+        <span asp-validation-for="UploadViewModel.UploadMethod" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+
+@if (Model.UploadViewModel.Metadata != null && !string.IsNullOrEmpty(Model.UploadViewModel.Metadata.UploadResult))
+{
+    <div class="alert alert-success">@Model.UploadViewModel.Metadata.UploadResult</div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
