@@ -1,5 +1,0 @@
-@UploaderMVP_HostAddress = http://localhost:5094
-
-POST {{UploaderMVP_HostAddress}}/api/upload/
-Accept: application/json
-
