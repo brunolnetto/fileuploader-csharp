@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 
 namespace UploaderMVP.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class FileUploadController : Controller
     {
         private readonly ILogger<FileUploadController> _logger;

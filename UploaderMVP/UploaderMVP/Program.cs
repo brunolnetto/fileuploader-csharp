@@ -7,12 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddTransient<IFileUploader, SerializedUploader>();
-builder.Services.AddTransient<IFileUploader, ParallelizedUploader>();
-builder.Services.AddTransient<IFileUploader, AsynchronousUploader>();
-builder.Services.AddTransient<UploadOptions>();
-builder.Services.AddTransient<RetryHelper>();
-
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
