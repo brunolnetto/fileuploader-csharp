@@ -6,6 +6,8 @@ C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\Upload
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\UploaderMVP.dll
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\UploaderMVP.pdb
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\Microsoft.OpenApi.dll
+C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\Polly.dll
+C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\Polly.Core.dll
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\SuasVendas\source\repos\UploaderMVP\UploaderMVP\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll

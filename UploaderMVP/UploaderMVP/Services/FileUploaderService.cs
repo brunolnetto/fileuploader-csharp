@@ -1,30 +1,45 @@
-﻿namespace UploaderMVP.Services
-{
-    public static class RetryHelper
-    {
-        public static async Task ExecuteWithRetryAsync(Func<Task> action, int maxRetryAttempts, ILogger logger, CancellationToken cancellationToken)
-        {
-            int retryAttempts = 0;
-            while (retryAttempts < maxRetryAttempts)
-            {
-                try
-                {
-                    await action();
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    retryAttempts++;
-                    if (retryAttempts >= maxRetryAttempts)
-                    {
-                        logger.LogError(ex, "Max retry attempts reached. Operation failed.");
-                        throw;
-                    }
+﻿using System.Xml.Linq;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
+using Polly.Fallback;
+using Microsoft.Extensions.Logging;
 
-                    logger.LogWarning(ex, "Operation failed, retrying...");
-                    await Task.Delay(1000, cancellationToken);
-                }
-            }
+namespace UploaderMVP.Services
+{
+    public class UploadOptions
+    {
+        public int MaxRetryAttempts { get; set; } = 3;
+        public TimeSpan InitialRetryDelay { get; set; } = TimeSpan.FromSeconds(1);
+        public int MaxConcurrency { get; set; } = 5;
+    }
+    public class RetryHelper
+    {
+        private readonly AsyncRetryPolicy _retryPolicy;
+        private readonly ILogger<RetryHelper> _logger;
+
+        public RetryHelper(UploadOptions options, ILogger<RetryHelper> logger)
+        {
+            _logger = logger;
+
+            // Define a retry policy: retry up to 3 times with exponential backoff
+            _retryPolicy = Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(
+                    options.MaxRetryAttempts,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (exception, timeSpan, retryCount, context) =>
+                    {
+                        _logger.LogWarning(exception, $"Retry {retryCount} encountered an error. Waiting {timeSpan} before next retry.");
+                    });
+        }
+
+        public async Task ExecuteWithRetryAsync(Func<Task> action, CancellationToken cancellationToken)
+        {
+            await _retryPolicy.ExecuteAsync(async () =>
+            {
+                await action();
+            });
         }
     }
 
@@ -42,17 +57,25 @@
     {
         protected readonly IFileService _fileService;
         protected readonly ILogger<BaseUploader> _logger;
+        protected readonly RetryHelper _retryHelper;
 
-        public BaseUploader(IFileService fileService, ILogger<BaseUploader> logger)
+        public BaseUploader(IFileService fileService, ILogger<BaseUploader> logger, RetryHelper retryHelper)
         {
             _fileService = fileService;
             _logger = logger;
+            _retryHelper = retryHelper;
         }
 
         public abstract Task UploadFilesAsync(IEnumerable<IFormFile> files, CancellationToken cancellationToken = default);
 
+        protected async Task UploadFileWithRetryAsync(IFormFile file, CancellationToken cancellationToken)
+        {
+            await _retryHelper.ExecuteWithRetryAsync(() => UploadFileWithLoggingAsync(file, cancellationToken), cancellationToken);
+        }
+
         protected async Task UploadFileWithLoggingAsync(IFormFile file, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
                 _logger.LogInformation($"Starting upload of file: {file.FileName}");
@@ -87,44 +110,63 @@
 
     public class SerializedUploader : BaseUploader
     {
-        public SerializedUploader(IFileService fileService, ILogger<SerializedUploader> logger)
-            : base(fileService, logger) { }
+        public SerializedUploader(IFileService fileService, ILogger<SerializedUploader> logger, RetryHelper retryHelper)
+            : base(fileService, logger, retryHelper) { }
 
         public override async Task UploadFilesAsync(IEnumerable<IFormFile> files, CancellationToken cancellationToken = default)
         {
             foreach (var file in files)
             {
-                await UploadFileWithLoggingAsync(file, cancellationToken);
+                await UploadFileWithRetryAsync(file, cancellationToken);
             }
         }
     }
 
     public class ParallelizedUploader : BaseUploader
     {
-        public ParallelizedUploader(IFileService fileService, ILogger<ParallelizedUploader> logger)
-            : base(fileService, logger) { }
+        private readonly SemaphoreSlim _semaphore;
 
-        public override async Task UploadFilesAsync(IEnumerable<IFormFile> files, CancellationToken cancellationToken = default)
+        public ParallelizedUploader(IFileService fileService, ILogger<ParallelizedUploader> logger, UploadOptions options, RetryHelper retryHelper)
+            : base(fileService, logger, retryHelper)
         {
-            var tasks = files.Select(file => UploadWithRetryAsync(file, cancellationToken));
-            await Task.WhenAll(tasks);
+            _semaphore = new SemaphoreSlim(options.MaxConcurrency);
         }
 
         private async Task UploadWithRetryAsync(IFormFile file, CancellationToken cancellationToken)
         {
-            var retry_handler = () => UploadFileWithLoggingAsync(file, cancellationToken);
-            await RetryHelper.ExecuteWithRetryAsync(retry_handler, maxRetryAttempts: 3, _logger, cancellationToken);
+            await _semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                await _retryHelper.ExecuteWithRetryAsync(() => UploadFileWithLoggingAsync(file, cancellationToken), cancellationToken);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        public override async Task UploadFilesAsync(IEnumerable<IFormFile> files, CancellationToken cancellationToken = default)
+        {
+            var uploadTasks = files.Select(file => UploadWithRetryAsync(file, cancellationToken));
+            await Task.WhenAll(uploadTasks);
+
         }
     }
 
     public class AsynchronousUploader : BaseUploader
     {
-        public AsynchronousUploader(IFileService fileService, ILogger<AsynchronousUploader> logger)
-            : base(fileService, logger) { }
+        public AsynchronousUploader(IFileService fileService, ILogger<AsynchronousUploader> logger, RetryHelper retryHelper)
+            : base(fileService, logger, retryHelper) { }
 
         public override async Task UploadFilesAsync(IEnumerable<IFormFile> files, CancellationToken cancellationToken = default)
         {
-            var tasks = files.Select(file => UploadFileWithLoggingAsync(file, cancellationToken));
+            var tasks = new List<Task>();
+
+            foreach (var file in files)
+            {
+                tasks.Add(UploadFileWithRetryAsync(file, cancellationToken));
+            }
+
             await Task.WhenAll(tasks);
         }
     }

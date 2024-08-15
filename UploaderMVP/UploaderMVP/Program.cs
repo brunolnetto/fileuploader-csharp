@@ -5,20 +5,20 @@ using UploaderMVP.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddScoped<IFileUploader, SerializedUploader>();
-builder.Services.AddScoped<IFileUploader, ParallelizedUploader>();
-builder.Services.AddScoped<IFileUploader, AsynchronousUploader>();
-
-// Register the required string dependency
-builder.Services.AddSingleton<string>("YourStringValue");
-
 builder.Services.AddControllersWithViews();
-builder.Services.AddControllers();
+
+builder.Services.AddTransient<IFileUploader, SerializedUploader>();
+builder.Services.AddTransient<IFileUploader, ParallelizedUploader>();
+builder.Services.AddTransient<IFileUploader, AsynchronousUploader>();
+builder.Services.AddTransient<UploadOptions>();
+builder.Services.AddTransient<RetryHelper>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddRazorPages();
+builder.Services.AddLogging();
 
 var app = builder.Build();
 
@@ -45,11 +45,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapGet("/", () => "Hello World!");
-app.MapGet("/upload", () => { 
-    return new FileUploadController().Upload(); });
-app.MapPost("/upload", (FileUploadViewModel model, CancellationToken cancellationToken) => {
-    return new FileUploadController().UploadPost(model, cancellationToken);
-});
+app.MapGet("/hello", (Func<string>)(() => "Hello World!"));
+
 
 app.Run();

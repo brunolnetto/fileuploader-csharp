@@ -1,29 +1,33 @@
 ﻿@page
 @model UploaderMVP.Models.FileUploadViewModel
 
+@{
+    ViewData["Title"] = "File Upload";
+}
+
 <h2>@ViewData["Title"]</h2>
 
 <form method="post" enctype="multipart/form-data">
     <div class="form-group">
-        <label asp-for="UploadViewModel.Files">Choose files:</label>
-        <input asp-for="UploadViewModel.Files" type="file" multiple class="form-control" />
-        <span asp-validation-for="UploadViewModel.Files" class="text-danger"></span>
+        <label asp-for="Files">Choose files:</label>
+        <input asp-for="Files" type="file" multiple class="form-control" />
+        <span asp-validation-for="Files" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="UploadViewModel.UploadMethod">Select upload method:</label>
-        <select asp-for="UploadViewModel.UploadMethod" class="form-control">
+        <label asp-for="UploadMethod">Select upload method:</label>
+        <select asp-for="UploadMethod" class="form-control">
             <option value="serial">Serial</option>
             <option value="parallel">Parallel</option>
             <option value="asynchronous">Asynchronous</option>
         </select>
-        <span asp-validation-for="UploadViewModel.UploadMethod" class="text-danger"></span>
+        <span asp-validation-for="UploadMethod" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Upload</button>
 </form>
 
-@if (Model.Metadata != null && !string.IsNullOrEmpty(Model.Metadata.UploadResult))
+@if (!string.IsNullOrEmpty(Model.Metadata.UploadResult))
 {
     <div class="alert alert-success">@Model.Metadata.UploadResult</div>
 }
